@@ -12,6 +12,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.stereotype.Component;
 
@@ -33,6 +34,7 @@ public class LoggerFilter extends AbstractBasics implements Filter {
 
         try {
 
+            // Request
             HttpServletRequest req = (HttpServletRequest) request;
             List<String> headerNames = new ArrayList<>();
             Enumeration<String> hnIt = req.getHeaderNames();
@@ -46,7 +48,16 @@ public class LoggerFilter extends AbstractBasics implements Filter {
                 logger.info("\t{} -> {}", name, req.getHeader(name));
             });
 
+            // Execute
             chain.doFilter(request, response);
+
+            // Response
+            HttpServletResponse res = (HttpServletResponse) response;
+
+            logger.info("Response {}", res.getStatus());
+            res.getHeaderNames().stream().sorted().forEach(name -> {
+                logger.info("\t{} -> {}", name, res.getHeader(name));
+            });
 
         } finally {
             threadNameStateTool.revert();
